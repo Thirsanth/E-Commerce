@@ -1,0 +1,96 @@
+{% extends "auctions/layout.html" %}
+{% block body%}
+{% for listing in listings %}  
+
+<div class="container"> 
+    {%if message%}
+    {%if updatestatus%}
+    <div class="alert alert-success" role="alert">
+        {{message}}
+      </div>
+    {%else %}
+    <div class="alert alert-danger" role="alert">
+        {{message}}
+      </div>
+  {%endif%}
+  {%endif%}
+  </div>
+  <div class="container"> 
+    {%if not listing.isactive and user == listing.price.user %}
+    <div class="alert alert-success" role="alert">
+        Congratulations you have won the auction.
+      </div>
+  {%endif%}
+</div>
+<div class="container text-left">
+    <div class="row align-items-start">
+        <div class="row">
+            {%if user.is_authenticated and listing.isactive %}
+            {%if iscurrentuser %}
+            <form action="{% url 'auctionclose' title=listing.title %}" method="POST">
+                {%csrf_token%}
+                <button class="btn btn-outline-danger my-3" >Close auction</button>
+            </form>
+            {%endif%}
+            {%if listinginwatchlist%}
+            <form action="{% url 'removefromwatchlist' title=listing.title %}" method="POST">
+                {%csrf_token%}
+                <button class="btn btn-outline-danger">Remove from watchlist</button>
+            </form>
+            {%else%}
+            <form action="{% url 'addtowatchlist' title=listing.title %}" method="POST">
+                {%csrf_token%}
+                <button class="btn btn-outline-primary">Add to watchlist</button>
+            </form>
+            {%endif%}
+            {%endif%}
+        </div>
+       
+            <div class="row">
+                <h2>Listing:{{listing.title}}</h2>
+            </div>
+      <div class="col">
+         <img id="imageurl" src="{{listing.imageurl}}" width="200px" height="200px">
+      </div>
+      <div class="row">
+        
+        <p>{{listing.description}}</p>
+        <p>Owner:{{listing.owner}}</p>
+        <h4>Price: ${{listing.price.bid}}</h4>
+        {%if user.is_authenticated%}
+        <form action="{% url 'addbid' title=listing.title %}" method="POST">
+            {%csrf_token%}
+            <div class="form-floating mb-3">
+                <input type="number" min="0" class="form-control" id="bid" placeholder="Bidding Ammount" name="bid">
+                <label for="bid">bid</label>
+              </div>
+            <button class="btn btn-warning">BID</button>
+        </form>
+        {%endif%}
+        {%if user.is_authenticated%}
+        <form action="{% url 'comments' title=listing.title %}" method="POST">
+            {%csrf_token%}
+            <div class="form-floating mb-3 my-2">
+                <input type="text" class="form-control" id="comments" placeholder="Add a comment" name="comment">
+                <label for="comment">Comment</label>
+              </div>
+            <button class="btn btn-warning">Submit</button>
+            <br>
+            <div class="row my-3">
+                <h3>Comments</h3>
+                <ul class="list-group">
+                    {% for comment in addedcomments%}
+                    <li class="list-group-item"><p>~{{comment.author}}:{{comment.commentdata}}</p></li>
+                    {%endfor%}
+                  </ul>
+            </div>
+        </form>
+        {%endif%}
+       
+    </div>
+ 
+</div>
+</div>
+{% endfor %}
+
+{%endblock%}
